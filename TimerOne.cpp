@@ -33,6 +33,10 @@
  *
  *  See Google Code project http://code.google.com/p/arduino-timerone/ for latest
  */
+#if defined(ESP8266) || defined(ESP32)
+#define TIMERONE_cpp
+#endif // ESP8266 or ESP32
+ 
 #ifndef TIMERONE_cpp
 #define TIMERONE_cpp
 

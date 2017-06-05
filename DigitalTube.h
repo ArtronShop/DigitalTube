@@ -3,8 +3,17 @@
  * Author : Sonthaya Nongnuch (www.fb.me/maxthai)
  */
 
+ #ifndef DIGITALTUBE_H
+#define DIGITALTUBE_H
+
 #include <Arduino.h>
+#if defined(ESP8266)
+extern "C" {
+#include "user_interface.h"
+}
+#elif defined(__AVR__)
 #include "TimerOne.h"
+#endif // ESP8266
 
 struct {
 	int pin_sclk = 4, pin_rclk = 5, pin_dio = 6;
@@ -18,7 +27,6 @@ struct {
 	};
 } _DigiTubeConfig;
 
-		
 class DigitalTube {
 	public:
 		DigitalTube() ;
@@ -32,3 +40,5 @@ class DigitalTube {
 		
 }
 ;
+
+#endif

@@ -2,10 +2,16 @@
  * Written by IOXhop : www.ioxhop.com
  * Author : Sonthaya Nongnuch (www.fb.me/maxthai)
  */
+#ifndef DIGITALTUBE_CPP
+#define DIGITALTUBE_CPP
 
 #include <Arduino.h>
-#include "TimerOne.h"
 #include "DigitalTube.h"
+
+#if defined(ESP8266)
+os_timer_t __TudeTimer;
+#elif defined(ESP32)
+#endif // ESP8266
 
 DigitalTube::DigitalTube() {
 	_DigiTubeConfig.pin_sclk = 4;
@@ -26,15 +32,27 @@ void DigitalTube::begin() {
 	pinMode(_DigiTubeConfig.pin_dio, OUTPUT);
 	
 	digitalWrite(_DigiTubeConfig.pin_rclk, HIGH);
-	
+
+#if defined(ESP8266)
+	os_timer_setfn(&__TudeTimer, [](void *pArg) {
+#elif defined(ESP32)
+#else
 	Timer1.initialize(2000);
-	Timer1.attachInterrupt([]() {
+	Timer1.attachInterrupt([](){
+#endif // ESP8266 or ESP32
 		digitalWrite(_DigiTubeConfig.pin_rclk, LOW);
 		shiftOut(_DigiTubeConfig.pin_dio, _DigiTubeConfig.pin_sclk, LSBFIRST, _DigiTubeConfig.characters[_DigiTubeConfig.disp[_DigiTubeConfig.NextDigi]]);
 		shiftOut(_DigiTubeConfig.pin_dio, _DigiTubeConfig.pin_sclk, LSBFIRST, 0x80>>_DigiTubeConfig.NextDigi);
 		digitalWrite(_DigiTubeConfig.pin_rclk, HIGH);
 		_DigiTubeConfig.NextDigi = (_DigiTubeConfig.NextDigi >= 3 ? 0 : _DigiTubeConfig.NextDigi+1);
+#if defined(ESP8266)
+	}, NULL);
+	os_timer_arm(&__TudeTimer, 2, true);
+#elif defined(ESP32)
+	}, true);
+#else
 	});
+#endif // ESP8266 or ESP32
 }
 
 void DigitalTube::show(char digiOne, char digiTwo, char digiTree, char digiFour) {
@@ -57,3 +75,5 @@ void DigitalTube::show(char digiOne, char digiTwo, char digiTree, char digiFour)
 void DigitalTube::print(int number) {
 	show((number/1000)%10, (number/100)%10, (number/10)%10, number%10);
 }
+
+#endif
