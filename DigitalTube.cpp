@@ -11,6 +11,7 @@
 #if defined(ESP8266)
 os_timer_t __TudeTimer;
 #elif defined(ESP32)
+hw_timer_t * __TudeTimer = NULL;
 #endif // ESP8266
 
 DigitalTube::DigitalTube() {
@@ -36,6 +37,8 @@ void DigitalTube::begin() {
 #if defined(ESP8266)
 	os_timer_setfn(&__TudeTimer, [](void *pArg) {
 #elif defined(ESP32)
+	__TudeTimer = timerBegin(0, 80, true);
+	timerAttachInterrupt(__TudeTimer, [](){
 #else
 	Timer1.initialize(2000);
 	Timer1.attachInterrupt([](){
@@ -50,6 +53,8 @@ void DigitalTube::begin() {
 	os_timer_arm(&__TudeTimer, 2, true);
 #elif defined(ESP32)
 	}, true);
+	timerAlarmWrite(__TudeTimer, 2000, true);
+	timerAlarmEnable(__TudeTimer);
 #else
 	});
 #endif // ESP8266 or ESP32
